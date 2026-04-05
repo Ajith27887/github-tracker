@@ -1,4 +1,16 @@
+"use client"
+
 export default function Home() {
+	const callapi = async () => {
+		const res = await fetch("http://localhost:3001/");
+		if (!res.ok) {
+			console.log("Error");
+			
+		}
+		const data =  await res.json();
+		console.log(data);
+	}
+
   return (
     <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>Welcome to My App</h1>
@@ -9,6 +21,7 @@ export default function Home() {
         <li>Built with Next.js</li>
       </ul>
       <button
+	  	onClick={() => callapi()}
         style={{
           marginTop: "1rem",
           padding: "0.5rem 1rem",
