@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+	id Int @id @default(autoincrement())
+	name String
+	email String @unique
+	repos Repo[]
+}
+
+model Repo {
+	id  Int @id @default(autoincrement()) 
+	userId Int
+	repo String
+	user User @relation(fields: [userId], references: [id])
+	event Event[]
+}
+
+model Event {
+	id Int @id @default(autoincrement())
+	repoId Int
+	pullReq String
+	pushReq String
+	repo Repo @relation(fields: [repoId], references: [id])
+}

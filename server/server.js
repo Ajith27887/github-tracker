@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import cors from "cors";
 
@@ -9,8 +10,6 @@ app.get("/", (req, res) => {
 	res.json({ text: "Hello World" })
 })
 
-
 app.listen(port, () => {
 	console.log(`PORT STARTED ${port}`);
-
 })
