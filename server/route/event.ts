@@ -12,17 +12,17 @@ const prisma = new PrismaClient({ adapter : adapater })
 
 const route = express.Router();
 
-// GET repo 
+// GET events
 route.get("/", async (req: Request, res: Response) => {
-	const AllEvent = prisma.event.findMany();
-	console.log(AllEvent,"repos");	
+	const AllEvent = await prisma.event.findMany();
+	console.log(AllEvent,"events");
 	res.status(200).json(AllEvent)
 });
 
 
 route.post("/", async (req : Request, res: Response ) => {
 	try {
-		const AddEvent = prisma.event.createMany({
+		const AddEvent = await prisma.event.createMany({
 			data: [{
 				repoId : req.body.repoId,
 				req : req.body.repoName
@@ -36,7 +36,7 @@ route.post("/", async (req : Request, res: Response ) => {
 
 route.patch("/", async (req : Request, res: Response) => {
 	try {
-		const EditEvent = prisma.event.updateMany({
+		const EditEvent = await prisma.event.updateMany({
 			data : [{
 				Where : { id : req.body.repoId },
 				data : { req :  req.body.req }
