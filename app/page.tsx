@@ -1,38 +1,29 @@
 "use client"
 
 export default function Home() {
-	const callapi = async () => {
-		const res = await fetch("http://localhost:3001/");
-		if (!res.ok) {
-			console.log("Error");
-			
-		}
-		const data =  await res.json();
-		console.log(data);
-	}
-
   return (
-    <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Welcome to My App</h1>
-      <p>This is a dummy Next.js home page.</p>
-      <ul>
-        <li>Fast</li>
-        <li>Scalable</li>
-        <li>Built with Next.js</li>
-      </ul>
+    <main
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        fontFamily: "sans-serif",
+      }}
+    >
       <button
-	  	onClick={() => callapi()}
+        onClick={() => { window.location.href = "http://localhost:3001/auth/"; }}
         style={{
-          marginTop: "1rem",
-          padding: "0.5rem 1rem",
-          background: "#0070f3",
+          padding: "0.75rem 1.5rem",
+          background: "#24292f",
           color: "#fff",
           border: "none",
           borderRadius: "4px",
           cursor: "pointer",
+          fontSize: "1rem",
         }}
       >
-        Get Started
+        Login with GitHub
       </button>
     </main>
   );
