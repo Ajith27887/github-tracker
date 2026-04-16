@@ -4,6 +4,7 @@ import "dotenv/config";
 import { json } from "stream/consumers";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { error } from "console";
 
 
 const adapater = new PrismaPg({
@@ -46,7 +47,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 		})
 	})
 
-	const tokenData = await tokenResponse.json() as { access_token?: string; error?: string };
+	const tokenData = await tokenResponse.json() as { email : string; access_token?: string; error?: string };
 
 	console.log(tokenData);
 	if (!tokenData.access_token) {
@@ -54,17 +55,21 @@ route.get("/callback", async (req: Request, res: Response) => {
 		return;
 	}
 
-	// const user = await prisma.user.upsert({
-	// 	where : { id : user.id },
-	// 	update : { accessToken : a }
-	// 	create : { name :"", email : "", accessToken :  tokenData.access_token }
-	// })
-
-	const userResponse = await fetch("https://api.github.com/user/me", {
+	const userResponse = await fetch("https://api.github.com/user", {
 		headers : {
 			Authorization : `Bearer ${tokenData.access_token}`,
 			Accept : "application/vnd.github+json"
 		}
+	})
+
+
+	const userData = await userResponse.json() as {name : string; email : string; accessToken : string; githubId : number };
+	res.json(userData)
+
+	const user = await prisma.user.upsert({
+		where : { githubId : userData.githubId },
+		update : { accessToken : tokenData.access_token },
+		create : { name :"", email : "", accessToken :  tokenData.access_token, githubId :userData.githubId }
 	})
 
 	const repoResponse = await fetch("https://api.github.com/user/repos", {
@@ -74,20 +79,19 @@ route.get("/callback", async (req: Request, res: Response) => {
 		}
 	})
 
-	const data = await repoResponse.json();
+	const data = await repoResponse.json() ;
+	res.json(data)
 	
 		
-	// await prisma.repo.createMany({
-	// 	data : data.map((repo : any) => ({
-	// 		repoId : repo.id,
-	// 		userId : user.id,
-	// 		repo : repo.full_name
-	// 	}))
-	// })
+	await prisma.repo.createMany({
+		data : data.map((repo : any) => ({
+			repoId : repo.id,
+			userId : user.id,
+			repo : repo.full_name
+		}))
+	})
 
-	res.json(userResponse)
-
-	res.json("Table Added succesfully");
+	// res.json("Table Added succesfully");
 
 
   } catch (error) {
