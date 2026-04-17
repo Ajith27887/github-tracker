@@ -1,11 +1,21 @@
-import express, { application } from "express";
+import express from "express";
 import type { Request, Response } from "express";
 import "dotenv/config";
-import { json } from "stream/consumers";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { error } from "console";
+import "express-session";
 
+
+// By default, the express-session library doesn't know what data you plan to store in a session. Its internal
+//  interface is basically empty. If you tried to type req.session.userId without this block, TypeScript would throw an error saying:
+
+// What it does: This is called Interface Merging. You are telling the TypeScript compiler: "Hey, I know you already defined SessionData, but I'm adding a new property called userId which must always be a number."
+// Why use it: It gives you IntelliSense (autocomplete) and prevents you from accidentally trying to save a string or an object into the userId slot later.
+declare module 'express-session' {
+	interface SessionData {
+		userId : number
+	}
+}
 
 const adapater = new PrismaPg({
 	connectionString : process.env.DATABASE_URL
@@ -63,14 +73,17 @@ route.get("/callback", async (req: Request, res: Response) => {
 	})
 
 
-	const userData = await userResponse.json() as {name : string; email : string; accessToken : string; githubId : number };
-	res.json(userData)
+	const userData = await userResponse.json();
+	// res.json(userData)
 
 	const user = await prisma.user.upsert({
-		where : { githubId : userData.githubId },
+		where : { githubId : userData.id },
 		update : { accessToken : tokenData.access_token },
-		create : { name :"", email : "", accessToken :  tokenData.access_token, githubId :userData.githubId }
+		create : { name :"", email : "", accessToken :  tokenData.access_token, githubId : userData.id }
 	})
+
+	// What it does: This takes the specific ID of the user (likely from a database) and saves it into the Session Store (which could be in memory, Redis, or a database).
+  	req.session.userId = user.id
 
 	const repoResponse = await fetch("https://api.github.com/user/repos", {
 		headers : {
@@ -80,7 +93,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 	})
 
 	const data = await repoResponse.json() ;
-	res.json(data)
+	// res.json(data)
 	
 		
 	await prisma.repo.createMany({
@@ -88,11 +101,11 @@ route.get("/callback", async (req: Request, res: Response) => {
 			repoId : repo.id,
 			userId : user.id,
 			repo : repo.full_name
-		}))
+		})),
+		skipDuplicates : true
 	})
 
-	// res.json("Table Added succesfully");
-
+	res.redirect("http://localhost:3001/auth/me")
 
   } catch (error) {
 	console.error(error);
@@ -101,8 +114,15 @@ route.get("/callback", async (req: Request, res: Response) => {
 	
 })
 
-
-
-
+route.get("/me", async (req : Request, res : Response) => {
+	const userID = req.session.userId as number;
+	console.log(userID);
+	
+	if (userID) {
+		res.json(userID)
+	}else{
+		res.status(401).json("Please log in to access this page")
+	}
+})
 
 export default route
