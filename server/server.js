@@ -13,7 +13,7 @@ const app = express();
 
 app.use(cors({
 	origin: "http://localhost:3000",
-	Credentials: true
+	credentials: true
 }))
 
 app.use(session({
@@ -27,9 +27,16 @@ app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
+const requireAuth = ((req, res, next) => {
+	if (!req.session.userId) {
+		return res.status(401).json({ message: "Unauthorized" })
+	}
+	next();
+})
+
 
 app.use("/user", userData)
-app.use("/repo", repoList)
+app.use("/repo", requireAuth, repoList)
 app.use("/auth", githubOAuth)
 
 app.listen(port, () => {

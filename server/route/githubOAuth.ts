@@ -26,6 +26,10 @@ const prisma = new PrismaClient({ adapter : adapater })
 const route = express.Router();
 
 route.get("/", async (req : Request, res : Response) => {
+	    if (req.session.userId) {
+			console.log("fuck user is exist");
+			return
+		} 
 	  res.redirect(
 	    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=http://localhost:3001/auth/callback`
 	  );
