@@ -22,6 +22,8 @@ app.use(session({
 }));
 
 app.use(express.json());
+app.use("/event", express.raw({ type: "application/json" }));
+
 
 const port = process.env.PORT || 3001;
 
@@ -35,7 +37,7 @@ const requireAuth = ((req, res, next) => {
 app.use("/user", userData)
 app.use("/repo", requireAuth, repoList)
 app.use("/auth", githubOAuth)
-app.use("/event", event, express.raw({ type: "application/json" }))
+app.use("/event", event)
 
 app.listen(port, () => {
 	console.log(`PORT STARTED ${port}`);
