@@ -37,7 +37,7 @@ const requireAuth = ((req, res, next) => {
 app.use("/user", userData)
 app.use("/repo", requireAuth, repoList)
 app.use("/auth", githubOAuth)
-app.use("/events", event)
+app.use("/event", event)
 
 app.listen(port, () => {
 	console.log(`PORT STARTED ${port}`);
