@@ -32,6 +32,7 @@ const requireAuth = ((req, res, next) => {
 	next();
 })
 
+
 app.use("/user", userData)
 app.use("/repo", requireAuth, repoList)
 app.use("/auth", githubOAuth)
