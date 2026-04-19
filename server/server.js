@@ -21,8 +21,8 @@ app.use(session({
 	cookie: { secure: false }
 }));
 
-app.use(express.json());
-app.use("/event", express.raw({ type: "application/json" }));
+app.use(express.json({ verify: (req, _res, buf) => { req.rawBody = buf } }));
+app.use(express.urlencoded({ extended: true, verify: (req, _res, buf) => { req.rawBody = buf } }));
 
 
 const port = process.env.PORT || 3001;
