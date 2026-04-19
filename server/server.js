@@ -22,7 +22,7 @@ app.use(session({
 }));
 
 app.use(express.json());
-// app.use("/event", express.raw({ type: "application/json" }));
+app.use("/event", express.raw({ type: "application/json" }));
 
 
 const port = process.env.PORT || 3001;
