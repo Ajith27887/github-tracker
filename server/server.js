@@ -5,8 +5,7 @@ import userData from "./route/userData.js";
 import repoList from "./route/repo.ts";
 import githubOAuth from "./route/githubOAuth.ts";
 import session from "express-session";
-console.log("client_id:", process.env.GITHUB_CLIENT_ID);
-
+import event from "./route/event.ts"
 
 const app = express();
 
@@ -38,6 +37,7 @@ const requireAuth = ((req, res, next) => {
 app.use("/user", userData)
 app.use("/repo", requireAuth, repoList)
 app.use("/auth", githubOAuth)
+app.use("/events", event)
 
 app.listen(port, () => {
 	console.log(`PORT STARTED ${port}`);
