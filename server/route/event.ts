@@ -69,7 +69,7 @@ route.post("/", async (req : Request, res: Response ) => {
 
 	const EventData  = await prisma.event.create({
 		data  : {
-			message : payload.commits.message,
+			message : payload?.commits[0].message,
 			branch : payload.repository.default_branch,
 			repo :  {
 				connect : {
