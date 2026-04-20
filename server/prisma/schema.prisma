@@ -28,7 +28,8 @@ model Repo {
 model Event {
 	id Int @id @default(autoincrement())
 	repoId Int
-	req String
+	message String
+	branch String
 	repo Repo @relation(fields: [repoId], references: [id])
 	createdat DateTime @default(now())
 }

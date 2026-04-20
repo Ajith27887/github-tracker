@@ -26,19 +26,22 @@ const prisma = new PrismaClient({ adapter : adapater })
 const route = express.Router();
 
 route.get("/", async (req : Request, res : Response) => {
-	    if (req.session.userId) {
-			console.log("fuck user is exist");
-			return
-		} 
-	  res.redirect(
-	    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=http://localhost:3001/auth/callback`
-	  );
+	if (req.session.userId) {
+		return res.redirect("http://localhost:3001/auth/me");
+	}
+	res.redirect(
+		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=http://localhost:3001/auth/callback`
+	);
 })
 
-route.get("/callback", async (req: Request, res: Response) => { 
+route.get("/callback", async (req: Request, res: Response) => {
+
+	if (req.session.userId) {
+		return res.redirect("http://localhost:3001/auth/me");
+	}
 
 	// Why github send code instead of access token directly, Because redirect is happens on frontend route /callback so that is not safe,
-	//	After getting code we fetch access token on server, Safely it happens, then we store on DB 
+	//	After getting code we fetch access token on server, Safely it happens, then we store on DB
   const code = req.query.code as string;
 
   if (!code) {
