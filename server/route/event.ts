@@ -73,8 +73,8 @@ route.post("/", async (req : Request, res: Response ) => {
 			branch : payload.repository.default_branch,
 			repo :  {
 				connect : {
-					id : Number( payload.repository.id)
-				} 
+					repoId : Number(payload.repository.id)
+				}
 			}
 		}
 	})
