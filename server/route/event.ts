@@ -79,6 +79,7 @@ route.post("/", async (req : Request, res: Response ) => {
 	res.json(EventData)
 })
 
+
 route.patch("/", async (req : Request, res: Response) => {
 	try {
 		const EditEvent = await prisma.event.updateMany({
