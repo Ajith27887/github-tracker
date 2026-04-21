@@ -31,10 +31,8 @@ const event : EventPayload[] = [];
 
 // GET events
 route.get("/", async (req: Request, res: Response) => {
-	// const AllEvent = await prisma.event.findMany();
-	// console.log(AllEvent,"events");
-	// res.status(200).json(AllEvent)
-	res.json(event[0].payload)
+    const AllEvent = await prisma.event.findMany();                                                                                                 
+	res.json(AllEvent)
 });
 
 
