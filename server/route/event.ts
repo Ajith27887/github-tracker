@@ -106,6 +106,4 @@ route.delete("/", async (req, res) => {
 	}
 })
 
-
-
 export default route;
