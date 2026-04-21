@@ -19,9 +19,15 @@ router.get("/", async (req : Request, res : Response)  => {
 	const allData = await prisma.repo.findUnique({
 		where : {repo : "Ajith27887/github-tracker"}
 	})
-	
+
+	const sevenDate = new Date();
+	sevenDate.setDate(sevenDate.getDate() - 1)
+
 	const eventdata = await prisma.event.findMany({
-		where : { repoId : allData?.id }
+		where : { 
+			createdat : sevenDate,
+			repoId : allData?.id 
+		}
 	})
 	res.json(eventdata)
 })
