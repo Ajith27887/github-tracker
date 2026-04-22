@@ -48,8 +48,8 @@ router.get("/", async (req : Request, res : Response)  => {
 	  res.json(response.text)
 	}
 	
-		main();
-	res.json(eventdata)
+	main();
+	// res.json(eventdata)
 })
 
 export default router;
