@@ -23,33 +23,31 @@ router.get("/", async (req : Request, res : Response)  => {
 		where : {repo : "Ajith27887/github-tracker"}
 	})
 
-	const sevenDate = new Date();
-	sevenDate.setDate(sevenDate.getDate() - 7)
+	const sevenDaysAgo = new Date();
+	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
 	const eventdata = await prisma.event.findMany({
-		where : { 
-			createdat : sevenDate,
-			repoId : allData?.id 
+		where : {
+			createdat : { gte: sevenDaysAgo },
+			repoId : allData?.id
 		}
 	})
 
 	const ai = new GoogleGenAI({ apiKey: GeminiAPI });
 
-	async function main() {
-	  const response = await ai.models.generateContent({
-		model: "gemini-3-flash-preview",
-		contents: `Here are a developer's GitHub events from this week:${JSON.stringify(eventdata)}
+	try {
+		const response = await ai.models.generateContent({
+			model: "gemini-2.5-flash",
+			contents: `Here are a developer's GitHub events from this week:${JSON.stringify(eventdata)}
 
-		Write a 3-sentence plain English summary of what they worked on,
-		what repos were most active, and what types of changes they made.`,
-	  });
-  	  console.log(response);
-	  console.log(response.text);
-	  res.json(response.text)
+			Write a 3-sentence plain English summary of what they worked on,
+			what repos were most active, and what types of changes they made.`,
+		});
+		res.json({ summary: response.text, events: eventdata });
+	} catch (err : any) {
+		console.error("Gemini error:", err);
+		res.status(500).json({ error: err.message });
 	}
-	
-	main();
-	// res.json(eventdata)
 })
 
 export default router;
