@@ -5,10 +5,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import SmeeClient from "smee-client";
 import crypto from "crypto";
 import "dotenv/config";
-import { GoogleGenAI } from "@google/genai";
 
 const secret = process.env.GITHUB_WEEBHOOK_SECRET
-const GeminiAPI = process.env.GEMINI_API_KEY
 
 const smee = new SmeeClient({
 	source: 'https://smee.io/qGARbiSvI0iTQGoa',
@@ -75,25 +73,6 @@ route.post("/", async (req : Request, res: Response ) => {
 			}
 		}
 	})
-
-
-
-	const ai = new GoogleGenAI({ apiKey: GeminiAPI });
-
-	async function main() {
-	  const response = await ai.models.generateContent({
-	    model: "gemini-3-flash-preview",
-	    contents: `Here are a developer's GitHub events from this week:${JSON.stringify(EventData)}
-
-		Write a 3-sentence plain English summary of what they worked on,
-		what repos were most active, and what types of changes they made.`,
-	  });
-	  console.log(response.text);
-	  console.log(JSON.stringify(EventData));
-	  res.json(response.text)
-	}
-
-	main();
 
 })
 
