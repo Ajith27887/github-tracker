@@ -24,7 +24,7 @@ router.get("/", async (req : Request, res : Response)  => {
 	})
 
 	const sevenDate = new Date();
-	sevenDate.setDate(sevenDate.getDate() - 1)
+	sevenDate.setDate(sevenDate.getDate() - 7)
 
 	const eventdata = await prisma.event.findMany({
 		where : { 
@@ -43,8 +43,8 @@ router.get("/", async (req : Request, res : Response)  => {
 		Write a 3-sentence plain English summary of what they worked on,
 		what repos were most active, and what types of changes they made.`,
 	  });
+  	  console.log(response);
 	  console.log(response.text);
-	  console.log(JSON.stringify(eventdata));
 	  res.json(response.text)
 	}
 	
