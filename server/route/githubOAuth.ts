@@ -26,6 +26,8 @@ const prisma = new PrismaClient({ adapter : adapater })
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app";
 const BACKEND_URL  = process.env.BACKEND_URL  ?? "http://localhost:3001";
 
+console.log(process.env.BACKEND_URL);
+
 const route = express.Router();
 
 route.get("/", async (req : Request, res : Response) => {

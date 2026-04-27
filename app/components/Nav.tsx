@@ -25,6 +25,8 @@ export default function Nav() {
 
   const handleLogin = () => {
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+    console.log("NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+    console.log("apiBase used for redirect:", apiBase);
     window.location.href = `${apiBase}/auth/`;
   };
 
