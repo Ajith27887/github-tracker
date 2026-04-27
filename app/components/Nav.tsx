@@ -24,11 +24,11 @@ export default function Nav() {
   }, []);
 
   const handleLogin = () => {
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://github-tracker-9ne3.onrender.com";
     console.log("NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
     console.log("apiBase used for redirect:", apiBase);
     alert(`Will redirect to: ${apiBase}/auth/\n\nNEXT_PUBLIC_API_BASE_URL = ${process.env.NEXT_PUBLIC_API_BASE_URL}`);
-    // window.location.href = `${apiBase}/auth/`;
+    window.location.href = `${apiBase}/auth/`;
   };
 
   if (loading) return <nav className="p-4 border-b">Loading...</nav>;
