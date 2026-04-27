@@ -10,7 +10,7 @@ const secret = process.env.GITHUB_WEEBHOOK_SECRET
 
 const smee = new SmeeClient({
 	source: 'https://smee.io/qGARbiSvI0iTQGoa',
-	target: 'http://localhost:3001/event',
+	target: `${process.env.BACKEND_URL ?? "http://localhost:3001"}/event`,
 	logger: console
 })
 const events = smee.start()

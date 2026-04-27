@@ -12,16 +12,16 @@ import requireAuth from './middleware/middleware.ts';
 const app = express();
 
 app.use(cors({
-	origin: "http://localhost:3000",
+	origin: process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app",
 	credentials: true
 }))
 
 
 app.use(session({
-	secret: "Ajith27",
+	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false,
-	cookie: { secure: false }
+	cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'none' }
 }));
 
 

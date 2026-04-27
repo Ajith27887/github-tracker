@@ -23,21 +23,24 @@ const adapater = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter : adapater })
 
+const FRONTEND_URL = process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app";
+const BACKEND_URL  = process.env.BACKEND_URL  ?? "http://localhost:3001";
+
 const route = express.Router();
 
 route.get("/", async (req : Request, res : Response) => {
 	if (req.session.userId) {
-		return res.redirect("http://localhost:3000/");
+		return res.redirect(`${FRONTEND_URL}/`);
 	}
 	res.redirect(
-		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=http://localhost:3001/auth/callback`
+		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=${BACKEND_URL}/auth/callback`
 	);
 })
 
 route.get("/callback", async (req: Request, res: Response) => {
 
 	if (req.session.userId) {
-		return res.redirect("http://localhost:3000/");
+		return res.redirect(`${FRONTEND_URL}/`);
 	}
 
 	// Why github send code instead of access token directly, Because redirect is happens on frontend route /callback so that is not safe,
@@ -125,7 +128,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 		skipDuplicates : true
 	})
 
-	res.redirect("http://localhost:3000/")
+	res.redirect(`${FRONTEND_URL}/`)
 
   } catch (error) {
 	console.error(error);

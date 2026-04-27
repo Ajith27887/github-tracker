@@ -24,7 +24,8 @@ export default function Nav() {
   }, []);
 
   const handleLogin = () => {
-    window.location.href = "http://localhost:3001/auth/";
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+    window.location.href = `${apiBase}/auth/`;
   };
 
   if (loading) return <nav className="p-4 border-b">Loading...</nav>;
