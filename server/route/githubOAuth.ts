@@ -27,7 +27,7 @@ const route = express.Router();
 
 route.get("/", async (req : Request, res : Response) => {
 	if (req.session.userId) {
-		return res.redirect("http://localhost:3001/auth/me");
+		return res.redirect("http://localhost:3000/");
 	}
 	res.redirect(
 		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo&redirect_uri=http://localhost:3001/auth/callback`
@@ -37,7 +37,7 @@ route.get("/", async (req : Request, res : Response) => {
 route.get("/callback", async (req: Request, res: Response) => {
 
 	if (req.session.userId) {
-		return res.redirect("http://localhost:3001/auth/me");
+		return res.redirect("http://localhost:3000/");
 	}
 
 	// Why github send code instead of access token directly, Because redirect is happens on frontend route /callback so that is not safe,
@@ -85,8 +85,21 @@ route.get("/callback", async (req: Request, res: Response) => {
 
 	const user = await prisma.user.upsert({
 		where : { githubId : userData.id },
-		update : { accessToken : tokenData.access_token },
-		create : { name :"", email : "", accessToken :  tokenData.access_token, githubId : userData.id }
+		update : { 
+			accessToken : tokenData.access_token,
+			name: userData.name ?? "",
+			email: userData.email ?? null,
+			login: userData.login,
+			avatarUrl: userData.avatar_url
+		},
+		create : { 
+			name: userData.name ?? "",
+			email: userData.email ?? null,
+			login: userData.login,
+			avatarUrl: userData.avatar_url,
+			accessToken :  tokenData.access_token,
+			githubId : userData.id
+		}
 	})
 
 	// What it does: This takes the specific ID of the user (likely from a database) and saves it into the Session Store (which could be in memory, Redis, or a database).
@@ -112,7 +125,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 		skipDuplicates : true
 	})
 
-	res.redirect("http://localhost:3001/auth/me")
+	res.redirect("http://localhost:3000/")
 
   } catch (error) {
 	console.error(error);

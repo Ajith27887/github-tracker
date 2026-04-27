@@ -19,9 +19,14 @@ router.get("/", async (req : Request, res : Response)  => {
 	const userId = req.session.userId;                                                                                                                                                   
 	if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-	const allData = await prisma.repo.findUnique({
-		where : {repo : "Ajith27887/github-tracker"}
+	const repoId = Number(req.query.repoId);
+	if (!repoId) return res.status(400).json({ error: "repoId required" });
+
+	const allData = await prisma.repo.findFirst({
+		where : { id: repoId, userId: req.session.userId }
 	})
+
+	if (!allData) return res.status(404).json({ error: "Repo not found" });
 
 	const sevenDaysAgo = new Date();
 	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
@@ -46,7 +51,12 @@ router.get("/", async (req : Request, res : Response)  => {
 		res.json({ summary: response.text, events: eventdata });
 	} catch (err : any) {
 		console.error("Gemini error:", err);
-		res.status(500).json({ error: err.message });
+		const msg = String(err?.message ?? "");
+		const isUnavailable = msg.includes('"code":503') || msg.includes("UNAVAILABLE");
+		if (isUnavailable) {
+			return res.status(503).json({ error: "MODEL_UNAVAILABLE", message: "Gemini is busy. Please retry." });
+		}
+		res.status(500).json({ error: "SUMMARY_FAILED", message: msg });
 	}
 })
 

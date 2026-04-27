@@ -11,6 +11,16 @@ const prisma = new PrismaClient({ adapter: adapter });
 
 const router = express.Router()
 
+router.get("/me", async (req, res) => {
+	if (!req.session.userId) return res.status(401).json({ error: "Unauthorized" });
+	const user = await prisma.user.findUnique({
+		where: { id: req.session.userId },
+		select: { id: true, name: true, login: true, avatarUrl: true },
+	});
+	if (!user) return res.status(404).json({ error: "Not found" });
+	res.json(user);
+});
+
 // Reading Data from DB
 router.get("/", async (req, res) => {
 	const users = await prisma.user.findMany();
