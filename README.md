@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Activity Tracker
 
-## Getting Started
+An AI-powered dashboard that tracks your GitHub push events and generates concise, plain-English summaries of your weekly activity using Google Gemini.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **GitHub OAuth Integration:** Securely log in with your GitHub account.
+- **Real-time Event Tracking:** Automatically records `push` events via GitHub Webhooks.
+- **AI Summaries:** Generates 3-sentence activity reports using the `gemini-1.5-flash` model.
+- **Repository Filtering:** View activity and summaries for specific repositories.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ How to Generate a Summary
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app summarizes activity **recorded in real-time**. It does not fetch previous commit history from GitHub; it only summarizes events that occur *after* your repository is connected and the webhook is active.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1.  **Log In:** Click **Login with GitHub** to sync your repositories.
+2.  **Connect Your Repo:** Ensure your GitHub repository has a Webhook pointing to your backend URL (or Smee URL for local dev).
+3.  **Push Code:** Make a push to your repository. The app will detect this event and save it to the database.
+4.  **Select & Generate:** 
+    - Select the repository from the dropdown.
+    - Click **Generate Summary**.
+    - The AI will analyze the **recorded pushes** from the last 7 days and provide a 3-sentence summary of that specific activity.
 
-## Learn More
+## 💻 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS.
+- **Backend:** Node.js, Express, Prisma (PostgreSQL).
+- **AI:** Google Generative AI (Gemini API).
+- **Webhooks:** GitHub Webhooks (with Smee.io for local development).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Development Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Backend (Server)
+1. Navigate to `/server`.
+2. Install dependencies: `npm install`.
+3. Set up your `.env` file (see `server/prisma/schema.prisma` for DB requirements).
+4. Run migrations: `npx prisma migrate dev`.
+5. Start the server: `npm run dev`.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Frontend
+1. Navigate to the root directory.
+2. Install dependencies: `npm install`.
+3. Start the dev server: `npm run dev`.
+4. Open [http://localhost:3000](http://localhost:3000).
