@@ -18,6 +18,7 @@ interface EventPayload {
 	payload: Object
 }
 
+
 const route = express.Router();
 
 // GET events
@@ -63,7 +64,7 @@ route.post("/", async (req: Request, res: Response) => {
 				return res.status(401).send("Invalid signature");
 			}
 		}
-		
+
 
 		let data = req.body;
 		// Smee often wraps the payload in a 'payload' field as a stringified JSON if sent as form-data
