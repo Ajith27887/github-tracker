@@ -63,7 +63,6 @@ route.post("/", async (req : Request, res: Response ) => {
 		
 		return res.status(401).send("Invalid signature");
 	}
-
 	const data = req.body;
 	const payload = typeof data?.payload === "string" ? JSON.parse(data.payload) : data;
 	event.push({ payload });
