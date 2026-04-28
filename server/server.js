@@ -11,9 +11,19 @@ import requireAuth from './middleware/middleware.ts';
 
 const app = express();
 
+const allowedOrigins = [
+	process.env.FRONTEND_URL,
+	"https://github-tracker-silk.vercel.app",
+].filter(Boolean);
+
 app.use(cors({
-	origin: process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app",
-	credentials: true
+	origin: (origin, cb) => {
+		if (!origin) return cb(null, true);
+		if (allowedOrigins.includes(origin)) return cb(null, true);
+		if (/^https:\/\/github-tracker.*\.vercel\.app$/.test(origin)) return cb(null, true);
+		return cb(new Error(`CORS blocked: ${origin}`));
+	},
+	credentials: true,
 }))
 
 
