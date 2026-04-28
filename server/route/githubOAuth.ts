@@ -130,7 +130,13 @@ route.get("/callback", async (req: Request, res: Response) => {
 		skipDuplicates : true
 	})
 
-	res.redirect(`${FRONTEND_URL}/`)
+	req.session.save((err) => {
+		if (err) {
+			console.error("Session save failed", err);
+			return res.status(500).json({ error: "Session save failed" });
+		}
+		res.redirect(`${FRONTEND_URL}/`);
+	});
 
   } catch (error) {
 	console.error(error);

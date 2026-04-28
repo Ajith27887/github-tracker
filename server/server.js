@@ -13,6 +13,8 @@ import requireAuth from './middleware/middleware.ts';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
 	process.env.FRONTEND_URL,
 	"https://github-tracker-silk.vercel.app",
