@@ -4,11 +4,11 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 
-const adapater = new PrismaPg({
+const adapter = new PrismaPg({
 	connectionString : process.env.DATABASE_URL
 })
 
-const prisma = new PrismaClient({ adapter : adapater })
+const prisma = new PrismaClient({ adapter : adapter })
 
 const route = express.Router();
 
@@ -23,46 +23,52 @@ route.get("/", async (req: Request, res: Response) => {
 });
 
 
-route.post("/", async (req : Request, res: Response ) => {
+route.post("/", async (req: Request, res: Response) => {
 	try {
+		const userId = req.session.userId;
+		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-		 const userId = req.session.userId;                                                                                                                                                   
-    	if (!userId) return res.status(401).json({ error: "Unauthorized" });
-		
 		const repoId = Number(req.body.repoId);
-		
+		const repoName = req.body.repoName;
+
 		if (!Number.isInteger(repoId)) {
 			res.status(400).json({ error: "repoId must be a valid integer" });
 			return;
 		}
-		
-		const AddRepo = await prisma.repo.createMany({
-			data: [{
-				repoId,
-				userId : Number(req.body.id),
-				repo : req.body.repoName
-			}]
-		})
-		res.status(201).json(AddRepo)
-	} catch (error) {
-		res.status(500).json({error : "Failed to Add Repo"})
-	}
-})
 
-route.patch("/", async (req : Request, res: Response) => {
-	try {
-		const EditRepo = await prisma.repo.updateMany({
-			where : {userId : req.session.userId},
-			data : [{
-				Where : { id : req.body.userId },
-				data : { repo :  req.body.repo }
-			}]
-		})
-		res.status(201).json(EditRepo);
+		const AddRepo = await prisma.repo.create({
+			data: {
+				repoId,
+				userId: Number(userId),
+				repo: repoName
+			}
+		});
+		res.status(201).json(AddRepo);
 	} catch (error) {
-		res.status(500).json({ error : "Failed to Edit" })
+		console.error("Add Repo Error:", error);
+		res.status(500).json({ error: "Failed to Add Repo" });
 	}
-})
+});
+
+route.patch("/:id", async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const { repoName } = req.body;
+		
+		const EditRepo = await prisma.repo.update({
+			where: { 
+				id: Number(id),
+				userId: req.session.userId 
+			},
+			data: {
+				repo: repoName
+			}
+		});
+		res.status(200).json(EditRepo);
+	} catch (error) {
+		res.status(500).json({ error: "Failed to Edit Repo" });
+	}
+});
 
 
 route.delete("/", async (req, res) => {
