@@ -14,24 +14,20 @@ const DUMMY_AVATAR = "https://www.gravatar.com/avatar/?d=mp&s=80";
 
 export default function Nav() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api<User>("/user/me")
       .then((data) => setUser(data))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        console.warn("/user/me failed:", err);
+        setUser(null);
+      });
   }, []);
-
-  console.log(user,"user");
-  
 
   const handleLogin = () => {
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
     window.location.href = `${apiBase}/auth/`;
   };
-
-  if (loading) return <nav className="p-4 border-b">Loading...</nav>;
 
   return (
     <nav className="p-4 border-b flex justify-between items-center bg-white">
