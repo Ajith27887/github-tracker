@@ -39,7 +39,11 @@ app.use(session({
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false,
-	cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'none' }
+	cookie: {
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'none',
+		partitioned: process.env.NODE_ENV === 'production'
+	}
 }));
 
 
