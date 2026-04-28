@@ -5,6 +5,8 @@ import userData from "./route/userData.js";
 import repoList from "./route/repo.ts";
 import githubOAuth from "./route/githubOAuth.ts";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import pg from "pg";
 import event from "./route/event.ts"
 import summary from "./route/summary.ts";
 import requireAuth from './middleware/middleware.ts';
@@ -27,7 +29,11 @@ app.use(cors({
 }))
 
 
+const PgSession = connectPgSimple(session);
+const pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+
 app.use(session({
+	store: new PgSession({ pool: pgPool, createTableIfMissing: true }),
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false,
