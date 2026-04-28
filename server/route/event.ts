@@ -63,6 +63,7 @@ route.post("/", async (req: Request, res: Response) => {
 			}
 		}
 
+		
 		const data = req.body;
 		const payload = typeof data?.payload === "string" ? JSON.parse(data.payload) : data;
 
