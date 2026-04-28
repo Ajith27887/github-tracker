@@ -1,8 +1,6 @@
 import express from "express";
 import type { Request, Response } from "express";
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import "express-session";
 
 
@@ -17,7 +15,7 @@ declare module 'express-session' {
 	}
 }
 
-const prisma = new PrismaClient()
+import prisma from "../prismaClient.ts";
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app";
 const BACKEND_URL  = process.env.BACKEND_URL  ?? "http://localhost:3001";

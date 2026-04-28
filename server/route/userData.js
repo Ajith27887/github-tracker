@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
-import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
-const prisma = new PrismaClient();
+import prisma from "../prismaClient.ts";
 
 const router = express.Router()
 

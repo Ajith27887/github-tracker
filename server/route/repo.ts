@@ -1,10 +1,6 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-
-
-const prisma = new PrismaClient()
+import prisma from "../prismaClient.ts";
 
 const route = express.Router();
 

@@ -1,10 +1,9 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import SmeeClient from "smee-client";
 import crypto from "crypto";
 import "dotenv/config";
+import prisma from "../prismaClient.ts";
 
 const secret = process.env.GITHUB_WEEBHOOK_SECRET
 
@@ -14,8 +13,6 @@ const smee = new SmeeClient({
 	logger: console
 })
 const events = smee.start()
-
-const prisma = new PrismaClient();
 
 interface EventPayload {
 	payload: Object
