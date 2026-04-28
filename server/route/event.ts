@@ -36,11 +36,15 @@ route.get("/", async (req: Request, res: Response) => {
 
 
 route.post("/", async (req : Request, res: Response ) => {
+	console.log("Entered");
+	
 	const signature = req.header("X-Hub-Signature-256");
 	const Event = req.header("x-github-event")
 	const delivery = req.header("x-github-delivery")
 
 	if (!signature || !secret) {
+			console.log("Missing sign");
+
 		return res.status(401).send("Missing signature or secret");
 	}
 
@@ -55,6 +59,8 @@ route.post("/", async (req : Request, res: Response ) => {
 	const rawBody = (req as any).rawBody as Buffer;
 
 	if (process.env.NODE_ENV === "production" && !verify(rawBody, signature)) {
+		console.log("invalid");
+		
 		return res.status(401).send("Invalid signature");
 	}
 
