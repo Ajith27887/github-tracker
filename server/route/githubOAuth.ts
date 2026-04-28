@@ -17,11 +17,7 @@ declare module 'express-session' {
 	}
 }
 
-const adapter = new PrismaPg({
-	connectionString : process.env.DATABASE_URL
-})
-
-const prisma = new PrismaClient({ adapter : adapter })
+const prisma = new PrismaClient()
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app";
 const BACKEND_URL  = process.env.BACKEND_URL  ?? "http://localhost:3001";

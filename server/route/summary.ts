@@ -7,12 +7,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const GeminiAPI = process.env.GEMINI_API_KEY
 
-const adapater = new PrismaPg({
-	connectionString : process.env.DATABASE_URL
-})
-
-
-const prisma = new PrismaClient({ adapter : adapater })
+const prisma = new PrismaClient()
 const router = express.Router();
 
 router.get("/", async (req : Request, res : Response)  => {

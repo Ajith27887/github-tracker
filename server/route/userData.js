@@ -3,11 +3,7 @@ import express from "express";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
-//Prisma and adapotor setup;
-const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL
-})
-const prisma = new PrismaClient({ adapter: adapter });
+const prisma = new PrismaClient();
 
 const router = express.Router()
 

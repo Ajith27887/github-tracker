@@ -15,36 +15,40 @@ const smee = new SmeeClient({
 })
 const events = smee.start()
 
-const adapter = new PrismaPg({
-	connectionString : process.env.DATABASE_URL
-})
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient({ adapter : adapter })
- 
 interface EventPayload {
-	payload : Object
+	payload: Object
 }
 
 const route = express.Router();
-const event : EventPayload[] = [];
 
 // GET events
 route.get("/", async (req: Request, res: Response) => {
-    const AllEvent = await prisma.event.findMany();                                                                                                 
-	res.json(AllEvent)
+	try {
+		const AllEvent = await prisma.event.findMany({
+			include: { repo: true }
+		});
+		res.json(AllEvent)
+	} catch (error: any) {
+		res.status(500).json({ error: error.message });
+	}
 });
 
 
 route.post("/", async (req: Request, res: Response) => {
 	try {
-		console.log("Entered event POST");
+		console.log(">>> Incoming Webhook");
+		console.log("Headers:", JSON.stringify(req.headers, null, 2));
 
 		const signature = req.header("X-Hub-Signature-256");
 		const eventType = req.header("x-github-event");
 
+		console.log("Event Type:", eventType);
+
 		if (process.env.NODE_ENV === "production") {
 			if (!signature || !secret) {
-				console.log("Missing sign or secret");
+				console.error("Missing signature or secret in production");
 				return res.status(401).send("Missing signature or secret");
 			}
 
@@ -57,46 +61,62 @@ route.post("/", async (req: Request, res: Response) => {
 			}
 
 			const rawBody = (req as any).rawBody as Buffer;
-			if (!verify(rawBody, signature)) {
-				console.log("invalid signature");
+			if (!rawBody || !verify(rawBody, signature)) {
+				console.error("Invalid signature");
 				return res.status(401).send("Invalid signature");
 			}
 		}
 
-		
-		const data = req.body;
-		const payload = typeof data?.payload === "string" ? JSON.parse(data.payload) : data;
+		let data = req.body;
+		// Smee often wraps the payload in a 'payload' field as a stringified JSON if sent as form-data
+		const payload = (typeof data?.payload === "string") ? JSON.parse(data.payload) : data;
+
+		console.log("Payload Repository ID:", payload?.repository?.id);
+		console.log("Payload Commits Count:", payload?.commits?.length || 0);
 
 		if (eventType === "ping") {
+			console.log("Ping received");
 			return res.status(200).send("pong");
 		}
 
 		if (eventType === "push") {
-			const message = payload?.commits?.[0]?.message || "No commit message";
-			const branch = payload?.ref?.replace("refs/heads/", "") || payload?.repository?.default_branch || "unknown";
 			const githubRepoId = payload?.repository?.id;
-
 			if (!githubRepoId) {
+				console.error("No repository ID in payload");
 				return res.status(400).json({ error: "Missing repository ID" });
 			}
+
+			// Find the repo in our DB first to be sure it exists
+			const existingRepo = await prisma.repo.findUnique({
+				where: { repoId: Number(githubRepoId) }
+			});
+
+			if (!existingRepo) {
+				console.error(`Repo with github ID ${githubRepoId} not found in our database. Make sure it is tracked.`);
+				return res.status(404).json({ error: "Repository not tracked" });
+			}
+
+			const message = payload?.commits?.[0]?.message || "No commit message";
+			const branch = payload?.ref?.replace("refs/heads/", "") || payload?.repository?.default_branch || "unknown";
+
+			console.log(`Saving event for repo ${existingRepo.repo}: ${message} on ${branch}`);
 
 			const EventData = await prisma.event.create({
 				data: {
 					message,
 					branch,
-					repo: {
-						connect: {
-							repoId: Number(githubRepoId)
-						}
-					}
+					repoId: existingRepo.id
 				}
 			});
+
+			console.log("Event saved successfully:", EventData.id);
 			return res.status(201).json(EventData);
 		}
 
-		return res.status(200).send("Event received but not processed");
+		console.log(`Event ${eventType} received but not processed`);
+		return res.status(200).send(`Event ${eventType} received but not processed`);
 	} catch (error: any) {
-		console.error("Error processing event:", error);
+		console.error("!!! Error processing event:", error);
 		return res.status(500).json({ error: error.message });
 	}
 });
