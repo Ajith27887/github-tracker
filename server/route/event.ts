@@ -62,6 +62,10 @@ route.post("/", async (req : Request, res: Response ) => {
 	const payload = typeof data?.payload === "string" ? JSON.parse(data.payload) : data;
 	event.push({ payload });
 
+	console.log(data,"eventdata");
+	
+	
+
 	const EventData  = await prisma.event.create({
 		data  : {
 			message : payload?.commits[0].message,
