@@ -31,7 +31,6 @@ app.use(cors({
 }))
 
 
-
 const PgSession = connectPgSimple(session);
 const pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
