@@ -29,7 +29,7 @@ route.get("/", async (req : Request, res : Response) => {
 		return res.redirect(`${FRONTEND_URL}/`);
 	}
 	res.redirect(
-		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=&redirect_uri=${BACKEND_URL}/auth/callback`
+		`https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=read:user%20user:email&redirect_uri=${BACKEND_URL}/auth/callback`
 	);
 })
 
