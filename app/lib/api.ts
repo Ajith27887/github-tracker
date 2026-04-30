@@ -20,6 +20,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     credentials: "include",
   });
 
+  
   if (!res.ok) {
     const body = await res.json().catch(() => res.statusText);
     throw new ApiError(res.status, body);
