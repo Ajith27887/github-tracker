@@ -14,6 +14,7 @@ export class ApiError extends Error {
   }
 }
 
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
