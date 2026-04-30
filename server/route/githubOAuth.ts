@@ -54,12 +54,13 @@ route.get("/callback", async (req: Request, res: Response) => {
 		method : "POST",
 		headers : {
 			"content-Type" : "application/json",
-			"Accept" : "application/json" 
+			"Accept" : "application/json"
 		},
 		body : JSON.stringify ({
 			client_id : process.env.GITHUB_CLIENT_ID,
 			client_secret : process.env.GITHUB_CLIENT_SECRET,
-			code : code
+			code : code,
+			redirect_uri : `${BACKEND_URL}/auth/callback`
 		})
 	})
 
