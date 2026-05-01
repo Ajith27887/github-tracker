@@ -42,14 +42,19 @@ route.post("/", async (req: Request, res: Response) => {
 		const signature = req.header("X-Hub-Signature-256");
 		const eventType = req.header("x-github-event");
 
-		console.log("Event Type:", eventType);
+		console.log("EventType:", signature);
 
 		if (process.env.NODE_ENV === "production") {
 			if (!signature || !secret) {
 				console.error("Missing signature or secret in production");
 				return res.status(401).send("Missing signature or secret");
 			}
-
+/**
+ * 
+ * @param body Adding secret into body and digest hax
+ * @param signature Signature-256 is came from req
+ * @returns 
+ */
 			const verify = (body: Buffer, signature: string) => {
 				const digest = "sha256=" + crypto.createHmac("sha256", secret).update(body).digest("hex");
 				const signatureBuf = Buffer.from(signature);
