@@ -3,7 +3,6 @@ import type { Request, Response } from "express";
 import "dotenv/config";
 import "express-session";
 
-
 // By default, the express-session library doesn't know what data you plan to store in a session. Its internal
 //  interface is basically empty. If you tried to type req.session.userId without this block, TypeScript would throw an error saying:
 
@@ -113,7 +112,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 	})
 
 	const data = await repoResponse.json() ;
-	// res.json(data)
+	// res.json(data)access_token
 	
 		
 	await prisma.repo.createMany({
