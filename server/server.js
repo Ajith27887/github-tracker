@@ -18,6 +18,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
 	process.env.FRONTEND_URL,
 	"https://github-tracker-silk.vercel.app",
+	"http://localhost:3000",
 ].filter(Boolean);
 
 app.use(cors({
@@ -42,7 +43,9 @@ app.use(session({
 	proxy: true,
 	cookie: {
 		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'none'
+		// sameSite 'none' requires Secure (HTTPS); use 'lax' in local dev so
+		// cookies are sent over http://localhost without being blocked by browsers
+		sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
 	}
 }));
 
