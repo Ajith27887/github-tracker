@@ -18,6 +18,7 @@ import prisma from "../prismaClient.ts";
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "https://github-tracker-silk.vercel.app";
 const BACKEND_URL  = process.env.BACKEND_URL  ?? "http://localhost:3001";
+const isProd = process.env.NODE_ENV === "production";
 
 console.log(process.env.BACKEND_URL);
 
@@ -47,6 +48,8 @@ route.get("/callback", async (req: Request, res: Response) => {
     return;
   }
 
+  let step = "exchange-code-for-token";
+
   try {
 
 	  const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
@@ -71,6 +74,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 		return;
 	}
 
+	step = "fetch-github-user";
 	const userResponse = await fetch("https://api.github.com/user", {
 		headers : {
 			Authorization : `Bearer ${tokenData.access_token}`,
@@ -82,6 +86,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 	const userData = await userResponse.json();
 	// res.json(userData)
 
+	step = "upsert-user";
 	const user = await prisma.user.upsert({
 		where : { githubId : userData.id },
 		update : { 
@@ -104,6 +109,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 	// What it does: This takes the specific ID of the user (likely from a database) and saves it into the Session Store (which could be in memory, Redis, or a database).
   	req.session.userId = user.id
 
+	step = "fetch-github-repos";
 	const repoResponse = await fetch("https://api.github.com/user/repos", {
 		headers : {
 			Authorization : `Bearer ${tokenData.access_token}`,
@@ -115,6 +121,7 @@ route.get("/callback", async (req: Request, res: Response) => {
 	// res.json(data)access_token
 	
 		
+	step = "insert-repos";
 	await prisma.repo.createMany({
 		data : data.map((repo : any) => ({
 			repoId : repo.id,
@@ -133,8 +140,14 @@ route.get("/callback", async (req: Request, res: Response) => {
 	});
 
   } catch (error) {
-	console.error(error);
-	res.status(500).json({ error : "Internal Server Error" })
+	const err = error as { message?: string; code?: string; name?: string };
+	console.error(`[auth/callback] failed at step "${step}"`, error);
+	res.status(500).json({
+		error: "Internal Server Error",
+		step,
+		// Only surface internals outside production.
+		...(isProd ? {} : { name: err.name, code: err.code, message: err.message })
+	});
   }
 	
 })
