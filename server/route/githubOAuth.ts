@@ -86,6 +86,19 @@ route.get("/callback", async (req: Request, res: Response) => {
 	const userData = await userResponse.json();
 	// res.json(userData)
 
+	// fetch() doesn't throw on 4xx/5xx. Without this, a failed call here reaches
+	// the upsert as `githubId: undefined` and fails as an opaque Prisma error.
+	if (!userResponse.ok || !userData?.id) {
+		console.error("[auth/callback] GitHub /user failed", userResponse.status, userData);
+		res.status(502).json({
+			error: "Could not load your GitHub profile",
+			step: "fetch-github-user",
+			githubStatus: userResponse.status,
+			githubMessage: userData?.message ?? null
+		});
+		return;
+	}
+
 	step = "upsert-user";
 	const user = await prisma.user.upsert({
 		where : { githubId : userData.id },
@@ -145,8 +158,11 @@ route.get("/callback", async (req: Request, res: Response) => {
 	res.status(500).json({
 		error: "Internal Server Error",
 		step,
-		// Only surface internals outside production.
-		...(isProd ? {} : { name: err.name, code: err.code, message: err.message })
+		// Error taxonomy (Prisma codes like P2002/P1001) is safe to expose;
+		// `message` can echo field values, so it stays out of production.
+		name: err.name,
+		code: err.code,
+		...(isProd ? {} : { message: err.message })
 	});
   }
 	
