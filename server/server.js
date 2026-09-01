@@ -13,6 +13,8 @@ import requireAuth from './middleware/middleware.ts';
 
 const app = express();
 
+const isProd = process.env.NODE_ENV === 'production';
+
 app.set('trust proxy', 1);
 
 const allowedOrigins = [
@@ -41,8 +43,10 @@ app.use(session({
 	saveUninitialized: false,
 	proxy: true,
 	cookie: {
-		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'none'
+		// SameSite=None requires Secure; in dev (http://localhost) that pair is
+		// rejected by the browser, so the session cookie is never stored.
+		secure: isProd,
+		sameSite: isProd ? 'none' : 'lax'
 	}
 }));
 
