@@ -55,7 +55,7 @@
       "area": "ui",
       "title": "Recap UI redesign (Recap.html design, branch: upgrating-ui)",
       "user_visible_behavior": "The app has a polished developer-dark UI: split-panel login with terminal animation, ⌘K command-palette repo picker, AI summary view with narrative, stat cards with sparklines, commit bar chart, PR donut chart, contributor bars, key themes, and suggested next actions.",
-      "status": "in_progress",
+      "status": "passing",
       "verification": [
         "Run npm run dev.",
         "Open http://localhost:3000 — dark split-panel login screen renders.",
@@ -72,7 +72,8 @@
         "npx tsc --noEmit (frontend): PASSED 2026-06-13",
         "cd server && npx tsc --noEmit (backend): PASSED 2026-06-13",
         "npx next build: PASSED cleanly 2026-06-13, no CSS warnings",
-        "Bug fixed: removed @import tailwindcss — caused infinite Turbopack error loop in dev mode freezing browser"
+        "Bug fixed: removed @import tailwindcss — caused infinite Turbopack error loop in dev mode freezing browser",
+        "Status set to passing 2026-09-11 per user direction. Note: end-to-end browser test with live GitHub OAuth was never independently recorded."
       ],
       "notes": "Design source: Recap.html from claude.ai/design handoff bundle. Components in app/components/. Backend summary.ts enhanced for structured JSON output. End-to-end browser test requires live GitHub OAuth."
     },
@@ -111,6 +112,31 @@
         "Working as of commit 6477efd."
       ],
       "notes": "Uses @google/genai. 503 errors show a retry button in the UI."
+    },
+    {
+      "id": "auth-logout-001",
+      "priority": 6,
+      "area": "auth",
+      "title": "Add logout button on Navbar profile",
+      "user_visible_behavior": "In the top navbar, clicking the user profile (avatar/name) reveals a 'Logout' button. Clicking 'Logout' ends the session and redirects the user to the Home page in a logged-out state.",
+      "status": "in_progress",
+      "verification": [
+        "Start both frontend (npm run dev, port 3000) and server (npm run dev in server/, port 3001).",
+        "Log in via GitHub OAuth so the TopBar shows the user avatar and name.",
+        "Click the profile area in the TopBar — a 'Logout' menu with a 'Logout' button appears.",
+        "Click 'Logout'.",
+        "Verify the browser lands on the Home page ('/') showing the logged-out LoginView.",
+        "Verify GET http://localhost:3000/api/user/me (the UI's auth gate) now returns 401.",
+        "Reload the page — the user stays logged out (no auto re-login)."
+      ],
+      "evidence": [
+        "IMPLEMENTED 2026-09-11. Backend: POST /auth/logout added in server/route/githubOAuth.ts (destroys session via req.session.destroy, clears connect.sid cookie, returns 200 {ok:true}). Frontend: profile in app/components/TopBar.tsx is now a button opening a dropdown menu with a Logout item (click-outside + Esc close); app/page.tsx handleLogout() POSTs /api/auth/logout with a 4s AbortSignal.timeout then window.location.replace('/') (redirect is unconditional so a hung request can't strand the user; a loggingOut flag guards re-entry and shows 'Logging out…'). New .menu-pop/.menu-item styles + Icon.logout added.",
+        "Static checks PASSED 2026-09-11: npx tsc --noEmit (frontend), cd server && npx tsc --noEmit (backend), npx next build (compiled + typechecked clean).",
+        "Backend integration test PASSED 2026-09-11 (forged express-session cookie against local Postgres session store): GET /auth/me with valid session -> 200 userId; POST /auth/logout -> 200 {ok:true} + Set-Cookie clears connect.sid; GET /auth/me after -> 401; session row deleted from the DB store.",
+        "Both servers confirmed to start cleanly (frontend :3000 serves / -> 200; server :3001 'DB: connected').",
+        "PENDING: full browser end-to-end (click profile -> Logout -> lands on LoginView) not run — reaching the logged-in view requires a live GitHub OAuth session and browser tooling was unavailable this session. Manual click-test still needed before this feature is marked passing."
+      ],
+      "notes": "Implemented on branch adding_log_out. Files: server/route/githubOAuth.ts (POST /auth/logout), app/components/TopBar.tsx (profile dropdown), app/page.tsx (handleLogout), app/components/Icons.tsx (logout icon), app/globals.css (.menu-pop/.menu-item). Design: logout is POST + client-side redirect (NOT a backend redirect) because FRONTEND_URL in githubOAuth.ts defaults to the prod URL and must not bounce a local dev session to prod. Session is destroyed server-side even if the proxied Set-Cookie is not forwarded, so logout is effective regardless. Remaining: manual browser click-test through a real OAuth login."
     }
   ]
 }

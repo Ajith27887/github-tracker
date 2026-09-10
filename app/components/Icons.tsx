@@ -86,4 +86,9 @@ export const Icon = {
       <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
+  logout: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M15 17v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1M10 12h11M18 9l3 3-3 3" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
 };

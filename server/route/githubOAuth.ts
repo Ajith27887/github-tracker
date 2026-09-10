@@ -179,4 +179,32 @@ route.get("/me", async (req : Request, res : Response) => {
 	}
 })
 
+// Ends the session. The frontend calls this, then redirects the browser to its
+// own Home route ("/") — the redirect target stays client-side because
+// FRONTEND_URL here defaults to the production URL and must not bounce a local
+// dev session to prod.
+route.post("/logout", (req: Request, res: Response) => {
+	// connect.sid is the express-session default cookie name (server.js sets none).
+	const clearOpts = {
+		path: "/",
+		httpOnly: true,
+		secure: isProd,
+		sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+	};
+
+	if (!req.session) {
+		res.clearCookie("connect.sid", clearOpts);
+		return res.status(200).json({ ok: true });
+	}
+
+	req.session.destroy((err) => {
+		if (err) {
+			console.error("[auth/logout] session destroy failed", err);
+			return res.status(500).json({ error: "Logout failed" });
+		}
+		res.clearCookie("connect.sid", clearOpts);
+		res.status(200).json({ ok: true });
+	});
+})
+
 export default route

@@ -43,6 +43,7 @@ export default function App() {
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [tf, setTf] = useState<'7d' | '30d'>('7d');
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const loadRepos = useCallback(async () => {
     try {
@@ -111,6 +112,25 @@ export default function App() {
     if (selectedRepo) fetchSummary(selectedRepo, tf);
   }
 
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      // Cap the wait: if the request hangs, the session is still destroyed
+      // server-side, so don't leave the user stuck on the app shell.
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        signal: AbortSignal.timeout(4000),
+      });
+    } catch {
+      // Timeout or network error — fall through to the redirect regardless.
+    }
+    // Hard navigation to Home clears all in-memory app state. replace() so Back
+    // doesn't restore the logged-in shell.
+    window.location.replace('/');
+  }
+
   function handleTfChange(newTf: '7d' | '30d') {
     setTf(newTf);
     if (selectedRepo && phase === 'done') fetchSummary(selectedRepo, newTf);
@@ -140,7 +160,7 @@ export default function App() {
     <>
       <div className="app-bg" />
       <div style={{ position: 'relative', zIndex: 1, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <TopBar repo={selectedRepo} user={user} onSwitch={() => setPaletteOpen(true)} />
+        <TopBar repo={selectedRepo} user={user} onSwitch={() => setPaletteOpen(true)} onLogout={handleLogout} loggingOut={loggingOut} />
         <main style={{ flex: 1, overflowY: 'auto', padding: '30px 24px 60px' }}>
           {!selectedRepo && <Hero repos={repos} onPick={pickRepo} />}
           {selectedRepo && phase === 'generating' && <GeneratingPanel repo={selectedRepo} />}
