@@ -7,12 +7,17 @@ import prisma from "../prismaClient.ts";
 
 const secret = process.env.GITHUB_WEEBHOOK_SECRET
 
-const smee = new SmeeClient({
-	source: 'https://smee.io/qGARbiSvI0iTQGoa',
-	target: `${process.env.BACKEND_URL ?? "http://localhost:3001"}/event`,
-	logger: console
-})
-const events = smee.start()
+// Only proxy webhooks via smee in local dev (not in production or CI)
+if (process.env.NODE_ENV !== 'production') {
+	try {
+		const smee = new SmeeClient({
+			source: 'https://smee.io/qGARbiSvI0iTQGoa',
+			target: `http://localhost:${process.env.PORT ?? 3001}/event`,
+			logger: console
+		})
+		smee.start()
+	} catch {}
+}
 
 interface EventPayload {
 	payload: Object

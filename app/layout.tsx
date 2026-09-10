@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Nav from "./components/Nav";
 
 export const metadata: Metadata = {
-  title: "GitHub Tracker",
-  description: "Track your GitHub activity and get AI summaries",
+  title: "Recap — GitHub AI Summaries",
+  description: "Know what your repos did this week. Gemini-powered activity summaries.",
 };
 
 export default function RootLayout({
@@ -14,10 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 min-h-screen">
-        <Nav />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

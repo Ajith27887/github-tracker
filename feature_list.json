@@ -1,0 +1,116 @@
+{
+  "project": "github-tracker",
+  "last_updated": "2026-06-13",
+  "rules": {
+    "single_active_feature": true,
+    "passing_requires_evidence": true,
+    "do_not_skip_verification": true
+  },
+  "status_legend": {
+    "not_started": "Work has not begun.",
+    "passing": "The feature is the current active task.",
+    "blocked": "Work cannot continue until a documented blocker is resolved.",
+    "passing": "Required verification has passed and evidence is recorded."
+  },
+  "features": [
+    {
+      "id": "auth-001",
+      "priority": 1,
+      "area": "auth",
+      "title": "GitHub OAuth login and session",
+      "user_visible_behavior": "User clicks 'Login with GitHub', is redirected to GitHub, authorizes, and returns to the app as a logged-in user with their avatar visible in the nav.",
+      "status": "passing",
+      "verification": [
+        "Start both frontend and server.",
+        "Click 'Login with GitHub' in the nav.",
+        "Complete GitHub OAuth flow.",
+        "Verify the nav shows the user's name and avatar.",
+        "Verify /api/user/me returns a 200 with user data."
+      ],
+      "evidence": [
+        "Committed in b16bae5 (auth changes) and dfceb90 (OAuth login restricted)."
+      ],
+      "notes": "OAuth scope restricted to read-only. Session managed via express-session + connect-pg-simple."
+    },
+    {
+      "id": "encrypt-001",
+      "priority": 2,
+      "area": "security",
+      "title": "Encrypt GitHub tokens at rest",
+      "user_visible_behavior": "GitHub OAuth access tokens stored in the database are encrypted with AES-256-GCM. The app still functions normally — the encryption/decryption is transparent.",
+      "status": "passing",
+      "verification": [
+        "Set TOKEN_ENCRYPTION_KEY in server/.env.",
+        "Log in via GitHub OAuth.",
+        "Inspect the token column in the database — it must NOT be plaintext.",
+        "Verify /api/summary/ still works (token decrypted successfully at runtime).",
+        "Verify /api/repo/ still returns the user's repos."
+      ],
+      "evidence": [],
+      "notes": "server/lib/encryption.ts exists but all code is commented out. Committed as 'encryption in progress' (be29f3e). Needs TOKEN_ENCRYPTION_KEY env var added and encrypt/decrypt wired into the OAuth callback and token retrieval path."
+    },
+    {
+      "id": "ui-001",
+      "priority": 3,
+      "area": "ui",
+      "title": "Recap UI redesign (Recap.html design, branch: upgrating-ui)",
+      "user_visible_behavior": "The app has a polished developer-dark UI: split-panel login with terminal animation, ⌘K command-palette repo picker, AI summary view with narrative, stat cards with sparklines, commit bar chart, PR donut chart, contributor bars, key themes, and suggested next actions.",
+      "status": "in_progress",
+      "verification": [
+        "Run npm run dev.",
+        "Open http://localhost:3000 — dark split-panel login screen renders.",
+        "Click 'Continue with GitHub' — redirects to GitHub OAuth.",
+        "After OAuth, app screen loads: TopBar with user avatar, ⌘K hint.",
+        "Repo list loads in command palette — search/arrow-key navigation works.",
+        "Select a repo — 'Gemini is analyzing…' skeleton renders, then full summary view.",
+        "Summary view shows: narrative card, 4 stat cards, commit bar chart, PR donut, themes, next actions.",
+        "Toggle 7d/30d — summary regenerates.",
+        "⌘K opens palette modal over summary view.",
+        "Click regenerate button — summary refreshes."
+      ],
+      "evidence": [
+        "npx tsc --noEmit (frontend): PASSED 2026-06-13",
+        "cd server && npx tsc --noEmit (backend): PASSED 2026-06-13",
+        "npx next build: PASSED cleanly 2026-06-13, no CSS warnings",
+        "Bug fixed: removed @import tailwindcss — caused infinite Turbopack error loop in dev mode freezing browser"
+      ],
+      "notes": "Design source: Recap.html from claude.ai/design handoff bundle. Components in app/components/. Backend summary.ts enhanced for structured JSON output. End-to-end browser test requires live GitHub OAuth."
+    },
+    {
+      "id": "repo-001",
+      "priority": 4,
+      "area": "core",
+      "title": "Repository listing",
+      "user_visible_behavior": "After logging in, the user sees a dropdown populated with their tracked GitHub repositories.",
+      "status": "passing",
+      "verification": [
+        "Log in via GitHub OAuth.",
+        "Verify the repo selector dropdown is populated.",
+        "Verify GET /api/repo/ returns a JSON array of repos."
+      ],
+      "evidence": [
+        "Working as of commit 6477efd ('Now the github tracker app is working fine')."
+      ],
+      "notes": ""
+    },
+    {
+      "id": "summary-001",
+      "priority": 5,
+      "area": "core",
+      "title": "AI activity summary (Gemini)",
+      "user_visible_behavior": "User selects a repository, clicks 'Generate Summary', and sees a natural-language summary of the last 7 days of activity.",
+      "status": "passing",
+      "verification": [
+        "Log in via GitHub OAuth.",
+        "Select a repository from the dropdown.",
+        "Click 'Generate Summary'.",
+        "Verify a text summary appears under 'Last 7 Days Summary'.",
+        "Verify a Gemini 503 returns the retry prompt instead of crashing."
+      ],
+      "evidence": [
+        "Working as of commit 6477efd."
+      ],
+      "notes": "Uses @google/genai. 503 errors show a retry button in the UI."
+    }
+  ]
+}
