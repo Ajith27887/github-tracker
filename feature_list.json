@@ -137,6 +137,26 @@
         "PENDING: full browser end-to-end (click profile -> Logout -> lands on LoginView) not run — reaching the logged-in view requires a live GitHub OAuth session and browser tooling was unavailable this session. Manual click-test still needed before this feature is marked passing."
       ],
       "notes": "Implemented on branch adding_log_out. Files: server/route/githubOAuth.ts (POST /auth/logout), app/components/TopBar.tsx (profile dropdown), app/page.tsx (handleLogout), app/components/Icons.tsx (logout icon), app/globals.css (.menu-pop/.menu-item). Design: logout is POST + client-side redirect (NOT a backend redirect) because FRONTEND_URL in githubOAuth.ts defaults to the prod URL and must not bounce a local dev session to prod. Session is destroyed server-side even if the proxied Set-Cookie is not forwarded, so logout is effective regardless. Remaining: manual browser click-test through a real OAuth login."
+    },
+    {
+      "id": "summary-002",
+      "priority": 7,
+      "area": "core",
+      "title": "AI summary reads real commit history from GitHub API, not just post-login webhook events",
+      "user_visible_behavior": "A user who just logged in for the first time picks a repository and gets an AI summary that reflects ALL commits from the last 7 days (and 30 days), including commits made before they logged in. The result no longer depends on the GitHub push webhook having been active during that window.",
+      "status": "not_started",
+      "verification": [
+        "Use an account/repo whose Event table has no rows for the selected repo (simulates a first-time login), but the repo has real commits in the last 7 days.",
+        "Start frontend + server, log in, select that repo.",
+        "Verify the summary's commit count is non-zero and matches the repo's actual commits in the last 7 days (cross-check against GitHub's commits view).",
+        "Verify the narrative / themes reference those real commit messages.",
+        "Verify the commit-activity chart (commitDays) buckets by real commit dates, not webhook-receipt time.",
+        "Toggle 30d — count and chart expand to the 30-day window.",
+        "Select a repo with no commits in the window — graceful 'no recent activity' summary, no crash.",
+        "Repeat with a private repo — still works (OAuth token auth)."
+      ],
+      "evidence": [],
+      "notes": "ROOT CAUSE: server/route/summary.ts builds the summary from prisma.event.findMany({ where: { createdat: { gte: since }, repoId } }). The Event table is only populated by the GitHub 'push' webhook (server/route/event.ts POST /), which (a) only starts recording after the webhook is wired up, so a first-time user has no history, (b) stores Event.createdat = webhook-receipt time, not the real commit timestamp, and (c) stores only payload.commits[0].message (first commit of each push). FIX: source commits for the summary directly from the GitHub REST API — GET https://api.github.com/repos/{owner}/{repo}/commits?since={since.toISOString()}&per_page=100 using userRecord.accessToken (already loaded at summary.ts:50-51); follow the Link rel=\"next\" header to paginate. Use commit.commit.author.date for computeCommitDays bucketing and commit.commit.message (first line) for commitMessages; commit count = total fetched. Handle GitHub errors / rate limit by falling back to the existing Event query or an empty result rather than 500. DECISION for v1: GET /commits returns the default branch only — recommend shipping default-branch-only first; multi-branch coverage can be a follow-up. The /event webhook and Event table can stay for other uses but are no longer the summary's commit source ('we don't need that step')."
     }
   ]
 }
